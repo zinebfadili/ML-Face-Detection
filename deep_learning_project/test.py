@@ -9,6 +9,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchsampler import ImbalancedDatasetSampler
+from PIL import Image
 
 
 if __name__ == '__main__':
@@ -65,9 +66,15 @@ def testNet(net, test_loader):
     print('Accuracy of the network on the 10000 test images: %d %%' % (
         100 * correct / total))
 
+    # get equal amount of data
+    # train
+    # test on the textures
+    # keep the images that have over threshold in 1
+    # inject those in train in non faces
+    # repeat
+
 
 def bootstrapNet(net):
-
     transform = transforms.Compose(
         [transforms.Grayscale(),
          transforms.ToTensor(),
@@ -82,13 +89,6 @@ def bootstrapNet(net):
 
     while threshold > 0.2:
         print(threshold)
-
-        # get equal amount of data
-        # train
-        # test on the textures
-        # keep the images that have over threshold in 1
-        # inject those in train in non faces
-        # repeat
 
         # get equal amount of data
         # load traindata
@@ -130,4 +130,8 @@ def bootstrapNet(net):
                 # indice de la valeur max (0 pas face, 1, c'est face)
                 proba = output.data[1]
                 if proba >= threshold:
-                    false_images.append(image)
+                    image_array = image.cpu().numpy()
+                    image_array = np.array(image_array*255, dtype='int8')
+                    image_to_save = Image.fromarray(
+                        image_array.reshape(36, 36))
+                    image_to_save.save(train_dir+"/0/img"+str(idx)+".pgm")
