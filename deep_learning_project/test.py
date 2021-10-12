@@ -12,22 +12,13 @@ from torchsampler import ImbalancedDatasetSampler
 from PIL import Image
 
 
-if __name__ == '__main__':
-    net = Net()
-    net = trainNet(train_loader)
-    testNet(test_loader, net)
-    # bootstrap the net
-    net = bootstrapNet(net)
-    testNet(test_loader, net)
-
-
 def trainNet(train_loader, net):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     correct = 0
     total = 0
     # train
-    for epoch in range(4):
+    for epoch in range(1):
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             images, labels = data
@@ -51,7 +42,7 @@ def trainNet(train_loader, net):
     return net
 
 
-def testNet(net, test_loader):
+def testNet(test_loader, net):
     total = 0
     correct = 0
     with torch.no_grad():
@@ -128,6 +119,7 @@ def bootstrapNet(net):
                 image, label = data
                 output = net(image)
                 # indice de la valeur max (0 pas face, 1, c'est face)
+                # TODO A CORRIGER POUR OBTENIR LA BONNE DONNEE
                 proba = output.data[1]
                 if proba >= threshold:
                     image_array = image.cpu().numpy()
@@ -135,3 +127,13 @@ def bootstrapNet(net):
                     image_to_save = Image.fromarray(
                         image_array.reshape(36, 36))
                     image_to_save.save(train_dir+"/0/img"+str(idx)+".pgm")
+    return net
+
+
+if __name__ == '__main__':
+    net = Net()
+    net = trainNet(train_loader, net)
+    testNet(test_loader, net)
+    # bootstrap the net
+    net = bootstrapNet(net)
+    testNet(test_loader, net)
