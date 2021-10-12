@@ -4,6 +4,12 @@ import torch.optim as optim
 import torch.nn.functional as F
 from load_data import *
 from net import *
+import numpy as np
+import torchvision
+import torchvision.transforms as transforms
+from torch.utils.data.sampler import SubsetRandomSampler
+from torchsampler import ImbalancedDatasetSampler
+
 
 if __name__ == '__main__':
     net = Net()
@@ -44,7 +50,9 @@ def trainNet(train_loader, net):
     return net
 
 
-def testNet(net, test_data):
+def testNet(net, test_loader):
+    total = 0
+    correct = 0
     with torch.no_grad():
         for data in test_loader:
             images, labels = data
@@ -59,6 +67,14 @@ def testNet(net, test_data):
 
 
 def bootstrapNet(net):
+
+    transform = transforms.Compose(
+        [transforms.Grayscale(),
+         transforms.ToTensor(),
+         transforms.Normalize(mean=(0,), std=(1,))])
+
+    batch_size = 32
+
     threshold = 0.8
     ceil = 0.2
     train_dir = './train_images_bootstrap'
@@ -79,6 +95,7 @@ def bootstrapNet(net):
         train_data = torchvision.datasets.ImageFolder(
             train_dir, transform=transform)
         # get indices of train data and shuffle them
+        num_train = len(train_data)
         indices_train = list(range(num_train))
         np.random.shuffle(indices_train)
 
@@ -95,28 +112,22 @@ def bootstrapNet(net):
 
         # get loaders
         train_loader = torch.utils.data.DataLoader(
-            test_data, batch_size=batch_size, shuffle=True, num_workers=1)
+            train_data, batch_size=batch_size, shuffle=True, num_workers=1)
 
         test_loader = torch.utils.data.DataLoader(
-            test_data, batch_size=batch_size, shuffle=True, num_workers=1)
+            test_data, batch_size=1, shuffle=True, num_workers=1)
 
         # train the net
         net = trainNet(train_loader, net)
 
         # test for our textures and store the indices of images that
         # the net got wrong > threshold
-        false_images_indices = []
+        false_images = []
         with torch.no_grad():
             for idx, data in enumerate(test_loader):
-                images, labels = data
-                outputs = net(images)
+                image, label = data
+                output = net(image)
                 # indice de la valeur max (0 pas face, 1, c'est face)
-
-                proba = outputs.data[1]
+                proba = output.data[1]
                 if proba >= threshold:
-                    false_images_indices.append(idx)
-
-        # inject too wrong textures into the train dataset
-
-        threshold -= ceil
-        ceil -= 0.05
+                    false_images.append(image)
