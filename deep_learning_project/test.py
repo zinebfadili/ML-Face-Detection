@@ -77,7 +77,7 @@ def bootstrapNet(net):
     threshold = 0.8
     ceil = 0.2
     train_dir = './train_images_bootstrap'
-    test_dir = './test_images_bootstrap'
+    test_dir = './test_images'
 
     while threshold > 0.2:
         print("threshold " + str(threshold))
@@ -116,25 +116,30 @@ def bootstrapNet(net):
         # the net got wrong > threshold
         false_images = []
         with torch.no_grad():
-            for idx, data in enumerate(test_loader):
+            for idx, data in enumerate(test_loader, 0):
+                print(idx)
                 image, label = data
                 output = net(image)
                 # indice de la valeur max (0 pas face, 1, c'est face)
                 print(output)
-                proba = output.data[1]
+                proba = output.data[0][1]
+                print(proba)
+                break
                 if proba >= threshold:
                     image_array = image.cpu().numpy()
                     image_array = np.array(image_array*255, dtype='int8')
                     image_to_save = Image.fromarray(
                         image_array.reshape(36, 36))
                     image_to_save.save(train_dir+"/0/img"+str(idx)+".pgm")
+
+        threshold -= 0.2
     return net
 
 
 if __name__ == '__main__':
     net = Net()
-    net = trainNet(train_loader, net)
-    testNet(test_loader, net)
+    #net = trainNet(train_loader, net)
+    #testNet(test_loader, net)
     # bootstrap the net
     print("bootstrapping the net")
     net = bootstrapNet(net)
