@@ -25,6 +25,7 @@ def trainNet(train_loader, net):
             # zero the parameter gradients
             optimizer.zero_grad()
             outputs = net(images)
+            # print(outputs.data)
             # print(outputs)
             # break
             # indice de la valeur max (0 pas face, 1, c'est face)
@@ -103,7 +104,7 @@ def bootstrapNet(net):
 
         # get loaders
         train_loader = torch.utils.data.DataLoader(
-            train_data, batch_size=batch_size, shuffle=True, num_workers=1)
+            train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
 
         test_loader = torch.utils.data.DataLoader(
             test_data, batch_size=1, shuffle=True, num_workers=1)
@@ -138,4 +139,4 @@ if __name__ == '__main__':
     print("bootstrapping the net")
     net = bootstrapNet(net)
     print("bootstrapping the net")
-    testNet(test_loader, net)
+    #testNet(test_loader, net)
