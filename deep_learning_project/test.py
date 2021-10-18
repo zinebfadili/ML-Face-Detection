@@ -79,7 +79,7 @@ def bootstrapNet(net):
     test_dir = './test_images_bootstrap'
 
     while threshold > 0.2:
-        print(threshold)
+        print("threshold " + str(threshold))
 
         # get equal amount of data
         # load traindata
@@ -119,7 +119,7 @@ def bootstrapNet(net):
                 image, label = data
                 output = net(image)
                 # indice de la valeur max (0 pas face, 1, c'est face)
-                # TODO A CORRIGER POUR OBTENIR LA BONNE DONNEE
+                print(output)
                 proba = output.data[1]
                 if proba >= threshold:
                     image_array = image.cpu().numpy()
@@ -135,5 +135,7 @@ if __name__ == '__main__':
     net = trainNet(train_loader, net)
     testNet(test_loader, net)
     # bootstrap the net
+    print("bootstrapping the net")
     net = bootstrapNet(net)
+    print("bootstrapping the net")
     testNet(test_loader, net)
