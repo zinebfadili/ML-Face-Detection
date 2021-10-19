@@ -17,6 +17,7 @@ def trainNet(train_loader, net):
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     correct = 0
     total = 0
+    print("size of train_loader " + str(len(train_loader.dataset)))
     # train
     for epoch in range(2):
         running_loss = 0.0
@@ -25,9 +26,6 @@ def trainNet(train_loader, net):
             # zero the parameter gradients
             optimizer.zero_grad()
             outputs = net(images)
-            # print(outputs.data)
-            # print(outputs)
-            # break
             # indice de la valeur max (0 pas face, 1, c'est face)
             _, predicted = torch.max(outputs.data, 1)
             loss = criterion(outputs, labels)
@@ -52,18 +50,15 @@ def testNet(test_loader, net):
             outputs = net(images)
             # indice de la valeur max (0 pas face, 1, c'est face)
             _, predicted = torch.max(outputs.data, 1)
+            print("labels")
+            print(labels)
+            print("predicted")
+            print(predicted)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
     print('Accuracy of the network on the 10000 test images: %d %%' % (
         100 * correct / total))
-
-    # get equal amount of data
-    # train
-    # test on the textures
-    # keep the images that have over threshold in 1
-    # inject those in train in non faces
-    # repeat
 
 
 def bootstrapNet(net):
@@ -141,6 +136,6 @@ if __name__ == '__main__':
     testNet(test_loader, net)
     # bootstrap the net
     print("bootstrapping the net")
-    net = bootstrapNet(net)
+    #net = bootstrapNet(net)
     print("bootstrapping the net")
-    testNet(test_loader, net)
+    #testNet(test_loader, net)

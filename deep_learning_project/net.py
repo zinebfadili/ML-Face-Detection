@@ -21,6 +21,6 @@ class Net(nn.Module):
         x = x.view(-1, 16 * 6 * 6)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        m = nn.Tanh()
+        m = nn.Softmax(dim=1)
         x = m(self.fc3(x))
         return x
