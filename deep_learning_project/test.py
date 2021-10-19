@@ -19,10 +19,17 @@ def trainNet(train_loader, net):
     total = 0
     print("size of train_loader " + str(len(train_loader.dataset)))
     # train
-    for epoch in range(2):
+    zeros = 0
+    ones = 0
+    for epoch in range(3):
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             images, labels = data
+            for label in labels:
+                if label == 0:
+                    zeros += 1
+                else:
+                    ones += 1
             # zero the parameter gradients
             optimizer.zero_grad()
             outputs = net(images)
@@ -38,6 +45,9 @@ def trainNet(train_loader, net):
                 print('[%d, %5d] loss: %.3f' %
                       (epoch + 1, i + 1, running_loss / 200))
                 running_loss = 0.0
+
+    print("ZEROS " + str(zeros))
+    print("ONES " + str(ones))
     return net
 
 
@@ -50,10 +60,6 @@ def testNet(test_loader, net):
             outputs = net(images)
             # indice de la valeur max (0 pas face, 1, c'est face)
             _, predicted = torch.max(outputs.data, 1)
-            print("labels")
-            print(labels)
-            print("predicted")
-            print(predicted)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
@@ -134,8 +140,10 @@ if __name__ == '__main__':
     net = Net()
     net = trainNet(train_loader, net)
     testNet(test_loader, net)
+    torch.save(net.state_dict(), './model_without_bootstrap.pth')
     # bootstrap the net
     print("bootstrapping the net")
-    #net = bootstrapNet(net)
+    net = bootstrapNet(net)
     print("bootstrapping the net")
-    #testNet(test_loader, net)
+    testNet(test_loader, net)
+    torch.save(net.state_dict(), './model_with_bootstrap.pth')
