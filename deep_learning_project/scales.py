@@ -90,7 +90,7 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
 
 if __name__ == '__main__':
     net = Net()
-    net.load_state_dict(torch.load("./model_with_bootstrap.pth"))
+    net.load_state_dict(torch.load("./model_without_bootstrap.pth"))
     #src_image_path = "./scale_images/247147411_3719854041572098_7124613502422578930_n.pgm"
     src_image_path = "./cropped_nirvana.pgm"
     face_coord = []
@@ -110,5 +110,5 @@ if __name__ == '__main__':
                     ((face[0], face[1]), (face[2], face[3])), outline="red")
 
         rgb_im = source_img.convert('RGB')
-        out_file = "./rectangle_image.jpg"
+        out_file = "./rectangle_image_wo_bs.jpg"
         rgb_im.save(out_file, "JPEG")
