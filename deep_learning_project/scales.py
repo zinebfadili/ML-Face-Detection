@@ -1,6 +1,6 @@
 import torch
 from net import *
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 import cv2
 
@@ -59,7 +59,7 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
 
             # We only register faces with a prob higher than 0.99 to avoid false positives
             # we have already added softmax as a last activation function on our model
-            if output[0][1] >= 0.9:
+            if output[0][1] >= 0.93:
                 detected_faces.append((x, y))
 
         # Add the detected faces and the corresponding factors to the all_faces variable
@@ -90,7 +90,19 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
 if __name__ == '__main__':
     net = Net()
     net.load_state_dict(torch.load("./model_with_bootstrap.pth"))
-    with Image.open("./scale_images/246393557_1085144615359115_5004478678969419665_n.pgm") as image:
-        bboxes = pyramid_sliding_window_detection(
-            net, np.array(image, dtype='float32'), 7, 36, 36, 5)
-        print(bboxes)
+    src_image_path = "./scale_images/246431776_256902993115857_5313003764819654236_n.pgm"
+    with Image.open(src_image_path) as image:
+        faces = pyramid_sliding_window_detection(
+            net, np.array(image, dtype='float32'), 6, 36, 36, 3)
+        print(faces)
+        source_img = Image.open(src_image_path).convert("RGBA")
+        draw = ImageDraw.Draw(source_img)
+
+        for face in faces[1][1]:
+            print(face)
+            draw.rectangle(
+                ((face[0], face[1]), (face[2], face[3])), outline="black")
+
+        rgb_im = source_img.convert('RGB')
+        out_file = "./rectangle_image.jpg"
+        rgb_im.save(out_file, "JPEG")
