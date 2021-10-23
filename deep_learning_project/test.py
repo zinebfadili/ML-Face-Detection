@@ -14,14 +14,14 @@ from PIL import Image
 
 def trainNet(train_loader, net):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=0.005, momentum=0.9)
     correct = 0
     total = 0
     print("size of train_loader " + str(len(train_loader.dataset)))
     # train
     zeros = 0
     ones = 0
-    for epoch in range(3):
+    for epoch in range(4):
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             images, labels = data
@@ -111,9 +111,6 @@ def bootstrapNet(net):
         test_loader = torch.utils.data.DataLoader(
             test_data, batch_size=1, shuffle=True, num_workers=1)
 
-        # train the net
-        net = trainNet(train_loader, net)
-
         # test for our textures and store the indices of images that
         # the net got wrong > threshold
         false_images = []
@@ -132,6 +129,8 @@ def bootstrapNet(net):
                     image_to_save.save(train_dir+"/0/img"+str(idx)+".pgm")
                 idx += 1
 
+        # train the net
+        net = trainNet(train_loader, net)
         threshold -= 0.2
     return net
 

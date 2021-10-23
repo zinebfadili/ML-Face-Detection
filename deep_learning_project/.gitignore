@@ -1,3 +1,4 @@
 test_images/**
 train_images/**
 train_images_bootstrap/**
+test_images_bootstrap/**
