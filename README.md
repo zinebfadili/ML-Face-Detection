@@ -3,8 +3,8 @@
 The goal of this project, a part of the Machine Learning Module, is to create a system for face detection using deep learning, or convolutional neural networks. In this project we prepared and found data for training and testing our model, we chose an architecture for our neural network. Furthermore, we implemented the bootstrapping technique to improve the accuracy of our model. Finally, we implemented the face detection system using the sliding window approach.
 
 ## Train and test dataset
-Train and test datasets can be found on Google Drive (add link here)
-To run the project, you need to create 4 directories in the project root:
+Train and test datasets can be found on [Google Drive](https://drive.google.com/drive/folders/1cD0W3h_4d_YP8P6Gy3KxWV8cvdUc3MIN?usp=sharing)
+To run the project, you need to unzip the 4 folders from the drive to the project root directory:
 1) `./test_images` that contains face and non-face images for testing
 2) `./test_images_bootstrap` contains the non-faces images used for bootstrapping
 3) `./train_images` contains train images from the original dataset
