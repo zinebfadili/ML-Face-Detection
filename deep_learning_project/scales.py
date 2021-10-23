@@ -4,7 +4,6 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 import cv2
 
-
 def pyramid(image, scale=1.5, minSize=(30, 30)):
     # yield the original image
     yield image
@@ -83,12 +82,11 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
                     all_detected_faces[j][1][i][1] + winH)*all_detected_faces[j][0],
                 all_detected_faces[j][1][i][2].item()
             )
-    # print(all_detected_faces)
     # Concatenate detected faces into the same array
     final_detected_faces = all_detected_faces
     return final_detected_faces
 
-
+"""Method to perform the non max suppression"""
 def nms(faces, thresh):
     x1 = faces[:, 0]
     y1 = faces[:, 1]
@@ -123,7 +121,6 @@ def nms(faces, thresh):
 if __name__ == '__main__':
     net = Net()
     net.load_state_dict(torch.load("./model_without_bootstrap.pth"))
-    # src_image_path = "./scale_images/247147411_3719854041572098_7124613502422578930_n.pgm"
     src_image_path = "./cropped_nirvana.pgm"
     face_coord = []
     with Image.open(src_image_path) as image:
@@ -133,16 +130,11 @@ if __name__ == '__main__':
         before_nms = []
         for i in np.linspace(1.5, 6, 10):
             scale = height/(36*i)
-            print(scale)
             faces = pyramid_sliding_window_detection(
                 net, np.array(image, dtype='float32'), scale, 36, 36, 6)
-            # print(faces[1][1])
 
             for face in faces[1][1]:
                 before_nms.append(face)
-                # print(face)
-                # draw.rectangle(
-                #   ((face[0], face[1]), (face[2], face[3])), outline="red")
 
         after_nms = nms(np.array(before_nms), 0.33)
         print(after_nms)

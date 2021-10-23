@@ -35,6 +35,3 @@ valid_loader = torch.utils.data.DataLoader(
 test_loader = torch.utils.data.DataLoader(
     test_data, batch_size=batch_size, shuffle=True, num_workers=1)
 classes = ('noface', 'face')
-
-# for epoch in range(1, n_epochs+1):
-# for data, target in train_loader:
