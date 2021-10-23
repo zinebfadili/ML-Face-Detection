@@ -59,9 +59,9 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
 
             # We only register faces with a prob higher than 0.99 to avoid false positives
             # we have already added softmax as a last activation function on our model
-            if output[0][1] >= 0.95:
-                # print(output[0][1])
-                detected_faces.append((x, y))
+            if output[0][1] >= 0.97:
+                # print(output)
+                detected_faces.append((x, y, output[0][1]))
 
         # Add the detected faces and the corresponding factors to the all_faces variable
         all_detected_faces.append([curr_scale_factor, detected_faces])
@@ -80,35 +80,80 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
                 all_detected_faces[j][0]
             ) + (
                 (all_detected_faces[j][1][i][0] + winW)*all_detected_faces[j][0], (
-                    all_detected_faces[j][1][i][1] + winH)*all_detected_faces[j][0]
+                    all_detected_faces[j][1][i][1] + winH)*all_detected_faces[j][0],
+                    all_detected_faces[j][1][i][2].item()
             )
     # print(all_detected_faces)
     # Concatenate detected faces into the same array
     final_detected_faces = all_detected_faces
     return final_detected_faces
 
+def nms(faces, thresh):
+    x1 = faces[:, 0]
+    y1 = faces[:, 1]
+    x2 = faces[:, 2]
+    y2 = faces[:, 3]
+    scores = faces[:, 4]
+
+    areas = (x2 - x1 + 1) * (y2 - y1 + 1)
+
+    order = scores.argsort()[::-1]
+
+    keep = []
+
+    while order.size > 0:
+        i = order[0]
+        keep.append(i) #保留该类剩余box中得分最高的一个
+        #得到相交区域,左上及右下
+        xx1 = np.maximum(x1[i], x1[order[1:]])
+        yy1 = np.maximum(y1[i], y1[order[1:]])
+        xx2 = np.minimum(x2[i], x2[order[1:]])
+        yy2 = np.minimum(y2[i], y2[order[1:]])
+
+        #计算相交的面积,不重叠时面积为0
+        w = np.maximum(0.0, xx2 - xx1 + 1)
+        h = np.maximum(0.0, yy2 - yy1 + 1)
+        inter = w * h
+        #计算IoU：重叠面积 /（面积1+面积2-重叠面积）
+        ovr = inter / (areas[i] + areas[order[1:]] - inter)
+        #保留IoU小于阈值的box
+        inds = np.where(ovr <= thresh)[0]
+        order = order[inds + 1] #因为ovr数组的长度比order数组少一个,所以这里要将所有下标后移一位
+       
+    return keep
 
 if __name__ == '__main__':
     net = Net()
-    net.load_state_dict(torch.load("./model_without_bootstrap.pth"))
-    #src_image_path = "./scale_images/247147411_3719854041572098_7124613502422578930_n.pgm"
+    net.load_state_dict(torch.load("./model_with_bootstrap.pth"))
+    # src_image_path = "./scale_images/247147411_3719854041572098_7124613502422578930_n.pgm"
     src_image_path = "./cropped_nirvana.pgm"
     face_coord = []
     with Image.open(src_image_path) as image:
         width, height = image.size
         source_img = Image.open(src_image_path).convert("RGBA")
         draw = ImageDraw.Draw(source_img)
+        before_nms = []
         for i in np.linspace(1.5, 6, 10):
             scale = height/(36*i)
             print(scale)
             faces = pyramid_sliding_window_detection(
                 net, np.array(image, dtype='float32'), scale, 36, 36, 6)
-            # print(faces)
+            # print(faces[1][1])
+            
+
             for face in faces[1][1]:
+                before_nms.append(face)
                 # print(face)
-                draw.rectangle(
-                    ((face[0], face[1]), (face[2], face[3])), outline="red")
+                # draw.rectangle(
+                #   ((face[0], face[1]), (face[2], face[3])), outline="red")
+
+        after_nms = nms(np.array(before_nms), 0.33)
+        print(after_nms)
+
+        for indice in after_nms:
+            after_nms_face = before_nms[indice]
+            draw.rectangle(((after_nms_face[0], after_nms_face[1]), (fac[2], fac[3])), outline="red")
 
         rgb_im = source_img.convert('RGB')
-        out_file = "./rectangle_image_wo_bs.jpg"
+        out_file = "./rectangle_image.jpg"
         rgb_im.save(out_file, "JPEG")

@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,14 +15,14 @@ from PIL import Image
 
 def trainNet(train_loader, net):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=0.0005, momentum=0.9)
     correct = 0
     total = 0
     print("size of train_loader " + str(len(train_loader.dataset)))
     # train
     zeros = 0
     ones = 0
-    for epoch in range(3):
+    for epoch in range(20):
         running_loss = 0.0
         for i, data in enumerate(train_loader, 0):
             images, labels = data
@@ -137,13 +138,15 @@ def bootstrapNet(net):
 
 
 if __name__ == '__main__':
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     net = Net()
+    
     net = trainNet(train_loader, net)
     testNet(test_loader, net)
-    torch.save(net.state_dict(), './model_without_bootstrap.pth')
+    torch.save(net.state_dict(), './model_without_bootstrap_new.pth')
     # bootstrap the net
     print("bootstrapping the net")
     net = bootstrapNet(net)
-    print("bootstrapping the net")
+    print("end of bootstrapping")
     testNet(test_loader, net)
-    torch.save(net.state_dict(), './model_with_bootstrap.pth')
+    torch.save(net.state_dict(), './model_with_bootstrap_new.pth')
