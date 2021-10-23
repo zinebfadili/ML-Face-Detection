@@ -124,7 +124,7 @@ def nms(faces, thresh):
 
 if __name__ == '__main__':
     net = Net()
-    net.load_state_dict(torch.load("./model_with_bootstrap.pth"))
+    net.load_state_dict(torch.load("./model_with_bootstrap_new.pth"))
     # src_image_path = "./scale_images/247147411_3719854041572098_7124613502422578930_n.pgm"
     src_image_path = "./cropped_nirvana.pgm"
     face_coord = []
@@ -152,8 +152,8 @@ if __name__ == '__main__':
 
         for indice in after_nms:
             after_nms_face = before_nms[indice]
-            draw.rectangle(((after_nms_face[0], after_nms_face[1]), (fac[2], fac[3])), outline="red")
+            draw.rectangle(((after_nms_face[0], after_nms_face[1]), (after_nms_face[2], after_nms_face[3])), outline="red")
 
         rgb_im = source_img.convert('RGB')
-        out_file = "./rectangle_image.jpg"
+        out_file = "./rectangle_image_w_bs_new.jpg"
         rgb_im.save(out_file, "JPEG")
