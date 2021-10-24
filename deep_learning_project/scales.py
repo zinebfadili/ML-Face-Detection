@@ -4,6 +4,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 import cv2
 
+
 def pyramid(image, scale=1.5, minSize=(30, 30)):
     # yield the original image
     yield image
@@ -86,7 +87,10 @@ def pyramid_sliding_window_detection(net, image, scale, winW, winH, stepSize):
     final_detected_faces = all_detected_faces
     return final_detected_faces
 
+
 """Method to perform the non max suppression"""
+
+
 def nms(faces, thresh):
     x1 = faces[:, 0]
     y1 = faces[:, 1]
@@ -113,8 +117,9 @@ def nms(faces, thresh):
         inter = w * h
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
         inds = np.where(ovr <= thresh)[0]
-        order = order[inds + 1] 
+        order = order[inds + 1]
 
+    print(keep)
     return keep
 
 
@@ -130,13 +135,14 @@ if __name__ == '__main__':
         before_nms = []
         for i in np.linspace(1.5, 6, 10):
             scale = height/(36*i)
+            print(scale)
             faces = pyramid_sliding_window_detection(
                 net, np.array(image, dtype='float32'), scale, 36, 36, 6)
 
             for face in faces[1][1]:
                 before_nms.append(face)
 
-        after_nms = nms(np.array(before_nms), 0.33)
+        after_nms = nms(np.array(before_nms), 0.2)
         print(after_nms)
 
         for indice in after_nms:
