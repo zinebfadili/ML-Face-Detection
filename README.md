@@ -25,3 +25,7 @@ The model can be trained and tested by running the `main.py` script. The executi
 - the model before running bootstrap `./model_without_bootstrap.pth`
 - the model after running bootstrap loops `./model_with_bootstrap.pth`
   Once the model is trained, run face detection on an image of your choice (format must be `.pgm`) using `scales.py`. The image will be exported in `.jpg` format with the rectangles containing the faces.
+  
+## Report
+
+A detailed report (.pdf file in repo) is available explaining our approach to the face classifier and detector.
